@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Cookie Clicker Deluxe</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+</head>
+<body>
+  <div class="particles"></div>
+  <div class="game">
+    <h1 class="title">🍪 Cookie Кликер 🍪</h1>
+    <div class="counter">Кликов: <span id="clicks">0</span></div>
+    
+    <div class="cookie-container">
+      <button id="cookie" class="cookie-btn animate__animated">ЖМИ!</button>
+      <div class="cookie-crumbs"></div>
+    </div>
+    
+    <div class="stats">
+      <div class="stat-box">
+        <span>Сила клика:</span>
+        <span id="click-power">1</span>
+      </div>
+      <div class="stat-box">
+        <span>Всего кликов:</span>
+        <span id="total-clicks">0</span>
+      </div>
+    </div>
+    
+    <div class="upgrades">
+      <h3>Доступные улучшения:</h3>
+      <div id="upgrades-container" class="upgrades-grid"></div>
+    </div>
+    
+    <div id="Improvements" class="purchased-upgrades">
+      <h3>Купленные улучшения:</h3>
+      <div class="upgrades-grid">
+        <button id="byeImprovements" class="upgrade">+500 за клик<br><span>(10000 кликов)</span></button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="floating-cookies"></div>
+  
+  <script src="script.js"></script>
+</body>
+</html>

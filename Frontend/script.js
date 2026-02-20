@@ -3,6 +3,7 @@ let clickPower = 1;
 let totalClicks = 0;
 let autoClicksPerSecond = 0;
 let abilityActive = false;
+let abilityMultiplier = 1;
 let purchasedUpgradeIds = [];
 let purchasedAutoUpgradeIds = [];
 let bakeryLevel = 1;
@@ -53,6 +54,10 @@ const abilities = [
   { id: 4, cost: 65000, text: "Супернова печенья x12 (3с)", duration: 3000, multiplier: 12 },
 ];
 
+function getEffectiveClickPower() {
+  return Math.max(1, Math.floor(clickPower * abilityMultiplier * levelMultiplier));
+}
+
 function calculateBakeryLevel() {
   bakeryLevel = Math.floor(totalClicks / 500) + 1;
   levelMultiplier = Number((1 + (bakeryLevel - 1) * 0.05).toFixed(2));
@@ -60,7 +65,7 @@ function calculateBakeryLevel() {
 
 function updateDisplay() {
   displayClick.textContent = clicks;
-  clickPowerDisplay.textContent = clickPower;
+  clickPowerDisplay.textContent = getEffectiveClickPower();
   totalClicksDisplay.textContent = totalClicks;
   autoClicksDisplay.textContent = autoClicksPerSecond;
   bakeryLevelDisplay.textContent = bakeryLevel;
@@ -183,8 +188,7 @@ abilities.forEach((ability) => {
 
     clicks -= ability.cost;
     abilityActive = true;
-    const originalPower = clickPower;
-    clickPower *= ability.multiplier;
+    abilityMultiplier = ability.multiplier;
     button.disabled = true;
     button.classList.add("active-ability");
 
@@ -192,7 +196,7 @@ abilities.forEach((ability) => {
     saveGame();
 
     setTimeout(() => {
-      clickPower = originalPower;
+      abilityMultiplier = 1;
       abilityActive = false;
       button.disabled = false;
       button.classList.remove("active-ability");
@@ -205,8 +209,7 @@ abilities.forEach((ability) => {
 });
 
 clickBtn.addEventListener("click", () => {
-  const clickValue = Math.max(1, Math.floor(clickPower * levelMultiplier));
-  clicks += clickValue;
+  clicks += getEffectiveClickPower();
   totalClicks += 1;
 
   calculateBakeryLevel();

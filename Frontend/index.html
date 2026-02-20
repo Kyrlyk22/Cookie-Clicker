@@ -7,16 +7,18 @@
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-  <link href="https://fonts.cdnfonts.com/css/druk-text-wide-trial" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 </head>
 <body>
   <div class="particles"></div>
-  <div class="game">
-    <h1 class="title animate__animated animate__bounceIn">🍪 Cookie Clicker 🍪</h1>
-    <div class="counter">Кликов: <span id="clicks">0</span></div>
-    <div class="stats">
+  <main class="game">
+    <h1 class="title animate__animated animate__bounceIn">🍪 Cookie Clicker: Neon Bakery</h1>
+    <p class="subtitle">Прокачивай пекарню, открывай новые улучшения и собирай идеальное печенье.</p>
+
+    <div class="counter">Куки: <span id="clicks">0</span></div>
+
+    <section class="stats">
       <div class="stat-box">
         <span>Сила клика</span>
         <span id="click-power">1</span>
@@ -29,25 +31,35 @@
         <span>Автоклики/с</span>
         <span id="auto-clicks">0</span>
       </div>
-    </div>
+      <div class="stat-box">
+        <span>Уровень пекарни</span>
+        <span id="bakery-level">1</span>
+      </div>
+      <div class="stat-box">
+        <span>Глобальный бонус</span>
+        <span id="global-multiplier">x1</span>
+      </div>
+    </section>
+
     <div class="cookie-container">
-      <button id="cookie" class="cookie-btn animate__animated">Клик!</button>
+      <button id="cookie" class="cookie-btn animate__animated">Испечь печенье</button>
     </div>
-    <div class="cookie-crumbs"></div>
-    <div class="upgrades">
-      <h3>Улучшения</h3>
+
+    <section class="upgrades">
+      <h3>Улучшения и оборудование</h3>
       <div id="upgrades-container" class="upgrades-grid"></div>
-    </div>
-    <div class="abilities">
-      <h3>Способности</h3>
+    </section>
+
+    <section class="abilities">
+      <h3>Активные способности</h3>
       <div id="abilities-container" class="upgrades-grid"></div>
-    </div>
-    <div class="purchased-upgrades" id="byeImprovements">
-      <h3>Купленные улучшения</h3>
+    </section>
+
+    <section class="purchased-upgrades" id="byeImprovements">
+      <h3>Журнал покупок</h3>
       <div id="Improvements"></div>
-    </div>
-  </div>
-  <div class="floating-cookies"></div>
+    </section>
+  </main>
   <script src="script.js"></script>
 </body>
 </html>

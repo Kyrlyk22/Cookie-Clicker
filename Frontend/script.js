@@ -3,6 +3,8 @@ let clickPower = 1;
 let totalClicks = 0;
 let autoClicksPerSecond = 0;
 let abilityActive = false;
+let purchasedUpgradeIds = [];
+let purchasedAutoUpgradeIds = [];
 
 const displayClick = document.getElementById("clicks");
 const clickPowerDisplay = document.getElementById("click-power");
@@ -23,8 +25,26 @@ function loadGame() {
     clickPower = save.clickPower || 1;
     totalClicks = save.totalClicks || 0;
     autoClicksPerSecond = save.autoClicksPerSecond || 0;
+    purchasedUpgradeIds = Array.isArray(save.purchasedUpgradeIds) ? save.purchasedUpgradeIds : [];
+    purchasedAutoUpgradeIds = Array.isArray(save.purchasedAutoUpgradeIds) ? save.purchasedAutoUpgradeIds : [];
     Improvements.innerHTML = save.Improvements || "";
     byImprovements.style.display = Improvements.innerHTML ? "block" : "none";
+
+    purchasedUpgradeIds.forEach((id) => {
+      const button = document.getElementById(`upgrade${id}`);
+      if (button) {
+        button.disabled = true;
+        button.classList.add("purchased");
+      }
+    });
+
+    purchasedAutoUpgradeIds.forEach((id) => {
+      const button = document.getElementById(`auto${id}`);
+      if (button) {
+        button.disabled = true;
+        button.classList.add("purchased");
+      }
+    });
   }
   updateDisplay();
 }
@@ -35,6 +55,8 @@ function saveGame() {
     clickPower,
     totalClicks,
     autoClicksPerSecond,
+    purchasedUpgradeIds,
+    purchasedAutoUpgradeIds,
     Improvements: Improvements.innerHTML,
   };
   localStorage.setItem("cookieClickerSave", JSON.stringify(save));
@@ -87,6 +109,7 @@ upgrades.forEach((upgrade) => {
       updateDisplay();
       button.disabled = true;
       button.classList.add("purchased");
+      purchasedUpgradeIds.push(upgrade.id);
       Improvements.innerHTML += `<div>${upgrade.text}</div>`;
       byImprovements.style.display = "block";
       saveGame();
@@ -107,6 +130,7 @@ autoUpgrades.forEach((auto) => {
       updateDisplay();
       button.disabled = true;
       button.classList.add("purchased");
+      purchasedAutoUpgradeIds.push(auto.id);
       Improvements.innerHTML += `<div>${auto.text}</div>`;
       byImprovements.style.display = "block";
       saveGame();

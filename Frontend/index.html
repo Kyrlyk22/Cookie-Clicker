@@ -7,59 +7,158 @@
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 </head>
-<body>
-  <div class="particles"></div>
-  <main class="game">
-    <h1 class="title animate__animated animate__bounceIn">🍪 Cookie Clicker: Neon Bakery</h1>
-    <p class="subtitle">Прокачивай пекарню, открывай новые улучшения и собирай идеальное печенье.</p>
+<body data-theme="1">
 
-    <div class="counter">Куки: <span id="clicks">0</span></div>
-
-    <section class="stats">
-      <div class="stat-box">
-        <span>Сила клика</span>
-        <span id="click-power">1</span>
-      </div>
-      <div class="stat-box">
-        <span>Всего кликов</span>
-        <span id="total-clicks">0</span>
-      </div>
-      <div class="stat-box">
-        <span>Автоклики/с</span>
-        <span id="auto-clicks">0</span>
-      </div>
-      <div class="stat-box">
-        <span>Уровень пекарни</span>
-        <span id="bakery-level">1</span>
-      </div>
-      <div class="stat-box">
-        <span>Глобальный бонус</span>
-        <span id="global-multiplier">x1</span>
-      </div>
-    </section>
-
-    <div class="cookie-container">
-      <button id="cookie" class="cookie-btn animate__animated">Испечь печенье</button>
+  <!-- ACHIEVEMENT TOAST -->
+  <div id="achievement-toast" class="achievement-toast hidden">
+    <div class="toast-icon" id="toast-icon">🏆</div>
+    <div class="toast-body">
+      <div class="toast-label">Достижение разблокировано!</div>
+      <div class="toast-name" id="toast-name">-</div>
     </div>
+  </div>
 
-    <section class="upgrades">
-      <h3>Улучшения и оборудование</h3>
-      <div id="upgrades-container" class="upgrades-grid"></div>
-    </section>
+  <!-- PRESTIGE MODAL -->
+  <div id="prestige-overlay" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-emoji">✨</div>
+      <h2 class="modal-title">Престиж-сброс</h2>
+      <p class="modal-desc">Ты сбросишь весь прогресс, но получишь постоянный бонус к кликам навсегда.</p>
+      <div class="modal-stats">
+        <div class="modal-stat"><span>Текущий множитель</span><span id="current-prestige-bonus">x1.0</span></div>
+        <div class="modal-stat"><span>После сброса</span><span id="new-prestige-bonus" class="green">x1.0</span></div>
+      </div>
+      <div class="modal-btns">
+        <button class="modal-btn cancel" id="prestige-cancel">Отмена</button>
+        <button class="modal-btn confirm" id="prestige-confirm">Подтвердить ✨</button>
+      </div>
+    </div>
+  </div>
 
-    <section class="abilities">
-      <h3>Активные способности</h3>
-      <div id="abilities-container" class="upgrades-grid"></div>
-    </section>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-logo">
+      <div class="logo-icon" id="header-cookie-icon">🍪</div>
+      <div>
+        <div class="logo-title">Cookie Clicker</div>
+        <div class="logo-sub" id="bakery-name-display">Пекарня Новичка</div>
+      </div>
+    </div>
+    <div class="header-center">
+      <div class="bakery-level-badge" id="bakery-level-badge">
+        <span>⭐ Ур. <span id="bakery-level-display">1</span></span>
+        <div class="level-progress-wrap"><div class="level-progress-bar" id="level-progress-bar"></div></div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="header-counter">
+        <div id="header-clicks" class="hc-value">0</div>
+        <div class="hc-auto">🍪 <span id="header-auto">0</span>/сек</div>
+      </div>
+      <button class="prestige-btn" id="prestige-btn">✨ Престиж</button>
+      <label class="theme-toggle" title="Тёмная / светлая тема">
+        <input type="checkbox" id="dark-toggle">
+        <span class="toggle-track">
+          <span class="toggle-sun">☀️</span>
+          <span class="toggle-moon">🌙</span>
+          <span class="toggle-thumb"></span>
+        </span>
+      </label>
+    </div>
+  </header>
 
-    <section class="purchased-upgrades" id="byeImprovements">
-      <h3>Журнал покупок</h3>
-      <div id="Improvements"></div>
-    </section>
-  </main>
+  <div class="layout">
+    <main class="left-panel">
+
+      <!-- COOKIE CARD -->
+      <div class="cookie-card" id="cookie-card">
+        <p class="cookie-label" id="cookie-label-text">Кликни на печенье</p>
+        <div class="cookie-img-wrap">
+          <div class="cookie-emoji" id="cookie">🍪</div>
+          <div id="float-container"></div>
+        </div>
+        <button class="click-btn" id="click-btn">
+          <span class="click-hint">КЛИКАЙ СЮДА!</span>
+          <span class="click-sub">+<span id="click-power-btn">1</span> печенька за клик</span>
+        </button>
+        <div class="prestige-display" id="prestige-display" style="display:none">
+          <span id="prestige-stars-display"></span>
+          <span id="prestige-bonus-text">Бонус: +0%</span>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon">🏆</div>
+          <div class="stat-label">Всего заработано</div>
+          <div class="stat-val" id="total-clicks">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">👆</div>
+          <div class="stat-label">Сила клика</div>
+          <div class="stat-val" id="click-count-stat">1</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⚡</div>
+          <div class="stat-label">В секунду</div>
+          <div class="stat-val" id="auto-clicks">0</div>
+        </div>
+      </div>
+
+      <!-- SKINS -->
+      <div class="skins-panel panel-card">
+        <div class="section-header">
+          <span>🎨 Скины печенья</span>
+          <span class="section-badge" id="skins-badge">1/8</span>
+        </div>
+        <div class="skins-grid" id="skins-grid"></div>
+      </div>
+
+      <!-- ACHIEVEMENTS -->
+      <div class="achievements-panel panel-card">
+        <div class="section-header">
+          <span>🏅 Достижения</span>
+          <span class="section-badge" id="achievements-badge">0/12</span>
+        </div>
+        <div class="achievements-grid" id="achievements-grid"></div>
+      </div>
+
+      <!-- ABILITIES -->
+      <div class="abilities-panel panel-card">
+        <div class="section-header">
+          <span>⚡ Активные способности</span>
+        </div>
+        <div id="abilities-container" class="abilities-grid"></div>
+      </div>
+
+      <!-- LOG -->
+      <div id="byeImprovements" class="log-panel panel-card" style="display:none">
+        <div class="section-header"><span>📋 Журнал покупок</span></div>
+        <div id="Improvements" class="log-list"></div>
+      </div>
+
+    </main>
+
+    <!-- SHOP -->
+    <aside class="shop-panel">
+      <div class="shop-header">
+        <span class="shop-title">Магазин</span>
+        <span class="shop-badge" id="shop-badge">0/20</span>
+      </div>
+      <div class="shop-tabs">
+        <button class="tab active" data-tab="upgrades">🔧 Улучшения</button>
+        <button class="tab" data-tab="auto">🤖 Автоклики</button>
+      </div>
+      <div class="shop-scroll">
+        <div id="upgrades-container" class="shop-list"></div>
+        <div id="auto-container" class="shop-list" style="display:none"></div>
+      </div>
+    </aside>
+  </div>
+
   <script src="script.js"></script>
 </body>
 </html>

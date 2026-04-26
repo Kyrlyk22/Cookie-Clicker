@@ -1,164 +1,541 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cookie Clicker Deluxe</title>
-  <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,600&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #050508;
+      --panel: #0d0d14;
+      --panel-soft: rgba(255, 255, 255, 0.02);
+      --line: rgba(255, 255, 255, 0.06);
+      --gold: #c8a96e;
+      --violet: #7c5cfc;
+      --amber: #ff9a3c;
+      --text: #e8e4dc;
+      --muted: #5a5670;
+      --danger: #8a3d3d;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Instrument Sans", system-ui, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .aurora {
+      position: fixed;
+      inset: -30%;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(124,92,252,.5), transparent 40%),
+        radial-gradient(circle at 80% 30%, rgba(29,89,129,.35), transparent 45%),
+        radial-gradient(circle at 50% 80%, rgba(70,35,140,.4), transparent 42%);
+      opacity: .1;
+      pointer-events: none;
+      filter: blur(50px);
+      animation: aurora 15s ease-in-out infinite;
+      z-index: 0;
+    }
+    @keyframes aurora {
+      0%,100% { transform: translate3d(0,0,0) scale(1); }
+      33% { transform: translate3d(4%, -3%, 0) scale(1.05); }
+      66% { transform: translate3d(-3%, 2%, 0) scale(1.08); }
+    }
+    .app { position: relative; z-index: 1; }
+    .entry { opacity: 0; transform: translateY(8px); animation: entry .4s ease-out forwards; }
+    @keyframes entry { to { opacity: 1; transform: translateY(0); } }
+
+    .header {
+      height: 56px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+      padding: 0 16px; border-bottom: 1px solid var(--line); position: sticky; top: 0;
+      background: rgba(5,5,8,.8); backdrop-filter: blur(12px); z-index: 10;
+    }
+    .wordmark { font-family: "Cormorant Garamond", serif; font-size: 1.4rem; letter-spacing: .06em; }
+    .wordmark b { color: var(--gold); }
+    .stats-strip { display:flex; gap:14px; font-family:"DM Mono", monospace; font-size:.78rem; color: var(--muted); }
+    .stats-strip strong { color: var(--gold); font-weight: 500; }
+    .prestige-btn {
+      margin-left: auto; border:1px solid var(--gold); background: transparent; color: var(--gold);
+      border-radius: 10px; height: 36px; padding: 0 14px; font-family: "DM Mono", monospace; cursor: pointer;
+    }
+    .prestige-btn:disabled { opacity:.35; cursor:not-allowed; }
+
+    .layout {
+      max-width: 1480px; margin: 16px auto; padding: 0 16px 16px;
+      display: grid; grid-template-columns: 320px minmax(360px, 1fr) 420px; gap: 14px;
+      min-height: calc(100vh - 90px);
+    }
+    .panel { border:1px solid var(--line); background: var(--panel); border-radius: 14px; padding: 14px; }
+
+    .left-panel,.right-panel { display:flex; flex-direction:column; gap:10px; max-height: calc(100vh - 110px); overflow: auto; }
+    .center-panel { display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:14px; }
+
+    .sec { border-top:1px solid var(--line); padding-top:10px; }
+    .sec:first-child { border-top: none; padding-top: 0; }
+    .sec-header { display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none; font-family:"DM Mono", monospace; font-size:.78rem; color:var(--muted); }
+    .sec-header h3 { font-size:.8rem; letter-spacing:.12em; color:var(--text); }
+    .chev { transition:.2s; }
+    .collapsed .chev { transform: rotate(-90deg); }
+    .sec-body { margin-top:10px; }
+    .collapsed .sec-body { display:none; }
+
+    .bakery-meta { font-family:"Cormorant Garamond", serif; font-style: italic; opacity:.5; }
+    .cookie-wrap { position:relative; width: 320px; height: 320px; display:grid; place-items:center; }
+    .cookie-btn {
+      width:280px; height:280px; border-radius:50%; border:0; background:transparent; cursor:pointer; position:relative;
+      filter: drop-shadow(0 18px 30px rgba(0,0,0,.5));
+    }
+    .cookie-svg { width:100%; height:100%; transition: transform .08s ease; }
+    .cookie-btn.clicked .cookie-svg { transform: scale(.94); }
+    .cookie-btn:hover { filter: drop-shadow(0 0 24px rgba(200,169,110,.4)) drop-shadow(0 18px 30px rgba(0,0,0,.5)); }
+
+    .ripple { position:absolute; border:1px solid rgba(200,169,110,.75); border-radius:50%; animation:ripple .5s ease-out forwards; pointer-events:none; }
+    @keyframes ripple { from { width:30px; height:30px; opacity:.8; } to { width:220px; height:220px; margin-left:-95px; margin-top:-95px; opacity:0; } }
+    .particle, .float-num { position:absolute; pointer-events:none; font-family:"DM Mono", monospace; }
+    .particle { color:var(--gold); animation:particle .6s ease-out forwards; }
+    @keyframes particle { to { transform: translate(var(--tx), var(--ty)); opacity:0; } }
+    .float-num { color: var(--amber); font-weight: 500; animation: float .7s ease-out forwards; }
+    @keyframes float { to { transform: translateY(-48px); opacity:0; } }
+
+    .center-stats { width:100%; max-width:560px; border:1px solid var(--line); background:var(--panel-soft); border-radius:12px; padding:12px; }
+    .metric-row { display:flex; justify-content:space-between; font-family:"DM Mono", monospace; font-size:1.15rem; }
+    .metric-row span:last-child { color: var(--gold); }
+    .tick { margin-top:10px; height:4px; background: rgba(255,255,255,.04); border-radius:999px; overflow:hidden; }
+    .tick > div { height:100%; width:0%; background:linear-gradient(90deg,var(--gold),var(--amber)); animation:tick 1s linear infinite; }
+    @keyframes tick { from { width:0%; } to { width:100%; } }
+
+    .skins { display:flex; gap:8px; overflow:auto; padding-bottom:4px; }
+    .skin-dot { width:34px; height:34px; border-radius:50%; border:1px solid var(--line); background:var(--panel-soft); cursor:pointer; display:grid; place-items:center; font-size:.7rem; color:var(--muted); }
+    .skin-dot.active { border-color:var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; color: var(--gold); }
+
+    .ach-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:7px; }
+    .ach-item { border:1px solid var(--line); border-radius:10px; padding:8px 6px; text-align:center; font-size:.62rem; background:var(--panel-soft); transition:.2s; }
+    .ach-item.locked { opacity:.25; filter: blur(1px); }
+    .ach-item time { display:block; margin-top:4px; color:var(--muted); font-family:"DM Mono", monospace; }
+
+    .ability-grid { display:grid; gap:8px; }
+    .ability-btn {
+      position:relative; display:flex; justify-content:space-between; align-items:center; gap:6px;
+      border:1px solid var(--line); background:var(--panel-soft); color:var(--text); border-radius:10px; padding:8px 10px;
+      font-size:.78rem; cursor:pointer;
+    }
+    .ability-btn small { color:var(--muted); font-family:"DM Mono", monospace; }
+    .ability-btn:disabled { opacity:.45; cursor:not-allowed; }
+    .cooldown-svg { width:24px; height:24px; }
+
+    .log { max-height:160px; overflow:auto; font-family:"DM Mono", monospace; font-size:.72rem; color:var(--muted); display:flex; flex-direction:column-reverse; gap:4px; }
+
+    .tabs { display:flex; position:relative; border-bottom:1px solid var(--line); margin-bottom:8px; }
+    .tab { flex:1; background:none; border:0; color:var(--muted); padding:10px; font-family:"DM Mono", monospace; cursor:pointer; }
+    .tab.active { color:var(--text); }
+    .tab-underline { position:absolute; bottom:-1px; left:0; width:50%; height:2px; background:var(--gold); transition:left .22s ease; }
+
+    .shop-list { display:flex; flex-direction:column; gap:8px; }
+    .shop-item {
+      border:1px solid rgba(255,255,255,.05); background: rgba(255,255,255,.02); border-radius:12px;
+      padding:10px; display:grid; grid-template-columns:38px 1fr auto; gap:10px; align-items:center; position:relative; overflow:hidden;
+    }
+    .shop-item::before { content:""; position:absolute; left:0; bottom:0; width:3px; height:0%; background:var(--gold); transition:height .2s ease; }
+    .shop-item:hover { background: rgba(200,169,110,.04); }
+    .shop-item:hover::before { height:100%; }
+    .icon-box { width:38px; height:38px; border-radius:10px; border:1px solid var(--line); display:grid; place-items:center; position:relative; }
+    .badge { position:absolute; top:-4px; right:-4px; background:var(--gold); color:#1b150a; border-radius:999px; font:500 .65rem "DM Mono"; padding:2px 5px; }
+    .shop-item h4 { font-size:.85rem; }
+    .shop-item p { font-size:.75rem; color:var(--muted); }
+    .buy-btn { border:1px solid var(--line); border-radius:10px; height:32px; padding:0 10px; font:500 .75rem "DM Mono"; }
+    .buy-btn.afford { background:var(--gold); color:#1e1507; border-color:transparent; cursor:pointer; }
+    .buy-btn.disabled { background:rgba(255,255,255,.05); color:var(--muted); }
+
+    .toast {
+      position:fixed; top:72px; right:16px; z-index:40; min-width:280px; border-left:4px solid var(--gold);
+      background:rgba(13,13,20,.65); backdrop-filter:blur(16px); border:1px solid var(--line); border-radius:10px; padding:10px;
+      transform:translateX(120%);
+    }
+    .toast.show { animation:toast-in .32s ease forwards; }
+    .toast.hide { animation:toast-out .25s ease forwards; }
+    @keyframes toast-in { to { transform:translateX(0); } }
+    @keyframes toast-out { to { transform:translateX(120%); } }
+
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); backdrop-filter:blur(20px); display:none; place-items:center; z-index:50; }
+    .modal-overlay.open { display:grid; }
+    .modal { width:min(480px,92vw); border:1px solid var(--line); border-radius:14px; background:var(--panel); padding:18px; transform:translateY(40px); opacity:0; animation:modal-in .3s ease forwards; }
+    @keyframes modal-in { to { transform:translateY(0); opacity:1; } }
+    .modal-metrics { margin:12px 0; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .m-box { border:1px solid var(--line); border-radius:10px; padding:10px; text-align:center; font-family:"DM Mono", monospace; }
+    .m-box strong { display:block; color:var(--gold); font-size:1.25rem; }
+    .modal-actions { display:flex; gap:8px; }
+    .ghost, .gold { flex:1; height:36px; border-radius:10px; font-family:"DM Mono", monospace; cursor:pointer; }
+    .ghost { background:transparent; color:var(--text); border:1px solid var(--line); }
+    .gold { background:var(--gold); border:0; color:#211608; }
+
+    .i { width:15px; height:15px; display:inline-block; vertical-align:-3px; margin-right:4px; }
+    @media (max-width: 1100px) { .layout { grid-template-columns: 1fr; } .left-panel,.right-panel { max-height:none; } .center-panel { order:1; } .left-panel { order:2; } .right-panel { order:3; } }
+  </style>
 </head>
-<body data-theme="1">
-
-  <!-- ACHIEVEMENT TOAST -->
-  <div id="achievement-toast" class="achievement-toast hidden">
-    <div class="toast-icon" id="toast-icon">🏆</div>
-    <div class="toast-body">
-      <div class="toast-label">Достижение разблокировано!</div>
-      <div class="toast-name" id="toast-name">-</div>
-    </div>
-  </div>
-
-  <!-- PRESTIGE MODAL -->
-  <div id="prestige-overlay" class="modal-overlay hidden">
-    <div class="modal">
-      <div class="modal-emoji">✨</div>
-      <h2 class="modal-title">Престиж-сброс</h2>
-      <p class="modal-desc">Ты сбросишь весь прогресс, но получишь постоянный бонус к кликам навсегда.</p>
-      <div class="modal-stats">
-        <div class="modal-stat"><span>Текущий множитель</span><span id="current-prestige-bonus">x1.0</span></div>
-        <div class="modal-stat"><span>После сброса</span><span id="new-prestige-bonus" class="green">x1.0</span></div>
+<body>
+  <div class="aurora"></div>
+  <div class="app">
+    <header class="header entry" style="animation-delay:0ms">
+      <div class="wordmark">✦ <b>CRUMB.EXE</b></div>
+      <div class="stats-strip">
+        <span><svg class="i" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor"/><circle cx="9" cy="9" r="1.5" fill="currentColor"/><circle cx="14" cy="10" r="1.3" fill="currentColor"/></svg>Total <strong id="header-clicks">0</strong></span>
+        <span><svg class="i" viewBox="0 0 24 24" fill="none"><path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="2"/></svg>Per Click <strong id="header-power">1</strong></span>
+        <span><svg class="i" viewBox="0 0 24 24" fill="none"><path d="M13 3L6 14h5l-1 7 8-12h-5l0-6Z" fill="currentColor"/></svg>CPS <strong id="header-auto">0</strong></span>
       </div>
-      <div class="modal-btns">
-        <button class="modal-btn cancel" id="prestige-cancel">Отмена</button>
-        <button class="modal-btn confirm" id="prestige-confirm">Подтвердить ✨</button>
-      </div>
-    </div>
-  </div>
+      <button id="prestige-btn" class="prestige-btn">PRESTIGE</button>
+    </header>
 
-  <!-- HEADER -->
-  <header class="header">
-    <div class="header-logo">
-      <div class="logo-icon" id="header-cookie-icon">🍪</div>
-      <div>
-        <div class="logo-title">Cookie Clicker</div>
-        <div class="logo-sub" id="bakery-name-display">Пекарня Новичка</div>
-      </div>
-    </div>
-    <div class="header-center">
-      <div class="bakery-level-badge" id="bakery-level-badge">
-        <span>⭐ Ур. <span id="bakery-level-display">1</span></span>
-        <div class="level-progress-wrap"><div class="level-progress-bar" id="level-progress-bar"></div></div>
-      </div>
-    </div>
-    <div class="header-right">
-      <div class="header-counter">
-        <div id="header-clicks" class="hc-value">0</div>
-        <div class="hc-auto">🍪 <span id="header-auto">0</span>/сек</div>
-      </div>
-      <button class="prestige-btn" id="prestige-btn">✨ Престиж</button>
-      <label class="theme-toggle" title="Тёмная / светлая тема">
-        <input type="checkbox" id="dark-toggle">
-        <span class="toggle-track">
-          <span class="toggle-sun">☀️</span>
-          <span class="toggle-moon">🌙</span>
-          <span class="toggle-thumb"></span>
-        </span>
-      </label>
-    </div>
-  </header>
+    <div class="layout">
+      <aside class="left-panel panel entry" style="animation-delay:60ms">
+        <section class="sec" id="sec-skins">
+          <div class="sec-header"><h3>SKINS</h3><span id="skins-badge">1/8</span><span class="chev">▾</span></div>
+          <div class="sec-body"><div id="skins-grid" class="skins"></div></div>
+        </section>
+        <section class="sec" id="sec-achievements">
+          <div class="sec-header"><h3>ACHIEVEMENTS</h3><span id="achievements-badge">0/12</span><span class="chev">▾</span></div>
+          <div class="sec-body"><div id="achievements-grid" class="ach-grid"></div></div>
+        </section>
+        <section class="sec" id="sec-abilities">
+          <div class="sec-header"><h3>ABILITIES</h3><span class="chev">▾</span></div>
+          <div class="sec-body"><div id="abilities-container" class="ability-grid"></div></div>
+        </section>
+        <section class="sec" id="sec-log">
+          <div class="sec-header"><h3>LOG</h3><span class="chev">▾</span></div>
+          <div class="sec-body"><div id="Improvements" class="log"></div></div>
+        </section>
+      </aside>
 
-  <div class="layout">
-    <main class="left-panel">
-
-      <!-- COOKIE CARD -->
-      <div class="cookie-card" id="cookie-card">
-        <p class="cookie-label" id="cookie-label-text">Кликни на печенье</p>
-        <div class="cookie-img-wrap">
-          <div class="cookie-emoji" id="cookie">🍪</div>
-          <div id="float-container"></div>
+      <main class="center-panel panel entry" style="animation-delay:120ms">
+        <div class="bakery-meta" id="bakery-name-display">Novice Bakery · Level <span id="bakery-level-display">1</span></div>
+        <div class="cookie-wrap" id="cookie-wrap">
+          <button id="cookie" class="cookie-btn" aria-label="cookie">
+            <svg class="cookie-svg" viewBox="0 0 300 300">
+              <defs><radialGradient id="cookieGrad" cx="35%" cy="30%"><stop offset="0%" stop-color="#5c2e10"/><stop offset="100%" stop-color="#3d1f0a"/></radialGradient></defs>
+              <circle cx="150" cy="150" r="138" fill="url(#cookieGrad)"/>
+              <path d="M80 120 C120 90,140 130,175 105" stroke="#c8a96e" stroke-width="3" fill="none"/>
+              <path d="M110 190 C145 160,172 205,215 172" stroke="#c8a96e" stroke-width="3" fill="none"/>
+              <path d="M95 85 L120 105 M190 125 L206 145 M150 220 L162 242" stroke="#c8a96e" stroke-width="2.4"/>
+              <circle cx="96" cy="140" r="13" fill="#1a0d04"/><circle cx="130" cy="84" r="11" fill="#1a0d04"/><circle cx="192" cy="90" r="12" fill="#1a0d04"/><circle cx="228" cy="158" r="14" fill="#1a0d04"/><circle cx="155" cy="165" r="10" fill="#1a0d04"/><circle cx="118" cy="220" r="12" fill="#1a0d04"/>
+            </svg>
+          </button>
         </div>
-        <button class="click-btn" id="click-btn">
-          <span class="click-hint">КЛИКАЙ СЮДА!</span>
-          <span class="click-sub">+<span id="click-power-btn">1</span> печенька за клик</span>
-        </button>
-        <div class="prestige-display" id="prestige-display" style="display:none">
-          <span id="prestige-stars-display"></span>
-          <span id="prestige-bonus-text">Бонус: +0%</span>
+        <div class="center-stats">
+          <div class="metric-row"><span>CPS</span><span id="auto-clicks">0</span></div>
+          <div class="metric-row"><span>BONUS</span><span id="prestige-bonus-text">+0%</span></div>
+          <div class="tick"><div></div></div>
         </div>
-      </div>
+      </main>
 
-      <!-- STATS -->
-      <div class="stats-row">
-        <div class="stat-card">
-          <div class="stat-icon">🏆</div>
-          <div class="stat-label">Всего заработано</div>
-          <div class="stat-val" id="total-clicks">0</div>
+      <aside class="right-panel panel entry" style="animation-delay:180ms">
+        <div class="tabs">
+          <button class="tab active" data-tab="upgrades">UPGRADES</button>
+          <button class="tab" data-tab="auto">AUTOCLICKERS</button>
+          <div id="tab-underline" class="tab-underline"></div>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon">👆</div>
-          <div class="stat-label">Сила клика</div>
-          <div class="stat-val" id="click-count-stat">1</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">⚡</div>
-          <div class="stat-label">В секунду</div>
-          <div class="stat-val" id="auto-clicks">0</div>
-        </div>
-      </div>
-
-      <!-- SKINS -->
-      <div class="skins-panel panel-card">
-        <div class="section-header">
-          <span>🎨 Скины печенья</span>
-          <span class="section-badge" id="skins-badge">1/8</span>
-        </div>
-        <div class="skins-grid" id="skins-grid"></div>
-      </div>
-
-      <!-- ACHIEVEMENTS -->
-      <div class="achievements-panel panel-card">
-        <div class="section-header">
-          <span>🏅 Достижения</span>
-          <span class="section-badge" id="achievements-badge">0/12</span>
-        </div>
-        <div class="achievements-grid" id="achievements-grid"></div>
-      </div>
-
-      <!-- ABILITIES -->
-      <div class="abilities-panel panel-card">
-        <div class="section-header">
-          <span>⚡ Активные способности</span>
-        </div>
-        <div id="abilities-container" class="abilities-grid"></div>
-      </div>
-
-      <!-- LOG -->
-      <div id="byeImprovements" class="log-panel panel-card" style="display:none">
-        <div class="section-header"><span>📋 Журнал покупок</span></div>
-        <div id="Improvements" class="log-list"></div>
-      </div>
-
-    </main>
-
-    <!-- SHOP -->
-    <aside class="shop-panel">
-      <div class="shop-header">
-        <span class="shop-title">Магазин</span>
-        <span class="shop-badge" id="shop-badge">0/20</span>
-      </div>
-      <div class="shop-tabs">
-        <button class="tab active" data-tab="upgrades">🔧 Улучшения</button>
-        <button class="tab" data-tab="auto">🤖 Автоклики</button>
-      </div>
-      <div class="shop-scroll">
         <div id="upgrades-container" class="shop-list"></div>
         <div id="auto-container" class="shop-list" style="display:none"></div>
-      </div>
-    </aside>
+      </aside>
+    </div>
   </div>
 
-  <script src="script.js"></script>
+  <div id="achievement-toast" class="toast">
+    <div style="font-family:'DM Mono',monospace;color:var(--gold);font-size:.68rem;">ACHIEVEMENT UNLOCKED</div>
+    <div id="toast-name" style="font-weight:500"></div>
+    <div id="toast-desc" style="font-size:.76rem;color:var(--muted)"></div>
+  </div>
+
+  <div id="prestige-overlay" class="modal-overlay">
+    <div class="modal">
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:1.7rem;">Prestige Reset</h2>
+      <p style="color:var(--muted);font-size:.86rem;margin-top:6px;">Reset progress and keep permanent multiplier growth.</p>
+      <div class="modal-metrics">
+        <div class="m-box">Current<strong id="current-prestige-bonus">x1.00</strong></div>
+        <div class="m-box">After Reset<strong id="new-prestige-bonus">x1.00</strong></div>
+      </div>
+      <div class="modal-actions">
+        <button id="prestige-cancel" class="ghost">CANCEL</button>
+        <button id="prestige-confirm" class="gold">CONFIRM</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let clicks = 0, clickPower = 1, totalClicks = 0, autoClicksPerSecond = 0;
+    let abilityActive = false, abilityMultiplier = 1;
+    let purchasedUpgradeIds = [], purchasedAutoUpgradeIds = [], unlockedAchievementIds = [], achievementTimes = {};
+    let bakeryLevel = 1, levelMultiplier = 1, prestigeCount = 0, prestigeMultiplier = 1;
+    let purchasedSkinIds = [1], activeSkinId = 1;
+    const purchaseCounts = {};
+
+    const upgrades = [
+      { id:1,power:2,cost:15,text:"Wooden Spoon",desc:"Basic baker tool",icon:"tool" },{ id:2,power:3,cost:35,text:"Oven Paddle",desc:"Faster extraction",icon:"tool" },
+      { id:3,power:5,cost:100,text:"Chocolate Batch",desc:"Efficiency flavor",icon:"batch" },{ id:4,power:10,cost:220,text:"Mixer",desc:"Doubles prep speed",icon:"mixer" },
+      { id:5,power:20,cost:500,text:"Secret Recipe",desc:"Legacy formula",icon:"scroll" },{ id:6,power:35,cost:1000,text:"Dough Factory",desc:"Industrial scale",icon:"factory" },
+      { id:7,power:55,cost:1800,text:"Caramel Booster",desc:"Energetic boost",icon:"bolt" },{ id:8,power:90,cost:3200,text:"Confection Drone",desc:"Airborne bakery",icon:"drone" },
+      { id:9,power:140,cost:5500,text:"Laser Oven",desc:"Micron precision",icon:"beam" },{ id:10,power:220,cost:9000,text:"Galactic Flour",desc:"Astral grain",icon:"orbit" },
+      { id:11,power:350,cost:14000,text:"Quantum Nuts",desc:"State-superposed crunch",icon:"atom" },{ id:12,power:550,cost:22000,text:"Bakery Core",desc:"Near-infinite output",icon:"core" },
+    ];
+    const autoUpgrades = [
+      { id:1,power:1,cost:150,text:"Apprentice",desc:"Reliable assistant",icon:"worker" },{ id:2,power:2,cost:500,text:"Small Line",desc:"Compact conveyor",icon:"line" },
+      { id:3,power:5,cost:1600,text:"Crew",desc:"Coordinated bakers",icon:"crew" },{ id:4,power:10,cost:3600,text:"Auto Oven",desc:"Continuous baking",icon:"auto" },
+      { id:5,power:20,cost:7000,text:"Robo Arm",desc:"Never tires",icon:"arm" },{ id:6,power:40,cost:14000,text:"Night Shift",desc:"24/7 operation",icon:"moon" },
+      { id:7,power:70,cost:24000,text:"Orbital Line",desc:"No interruptions",icon:"orbit" },{ id:8,power:120,cost:40000,text:"Neuro Factory",desc:"AI optimization",icon:"brain" },
+    ];
+    const abilities = [
+      { id:1,cost:5000,text:"Syrup Storm",desc:"x2 for 12s",duration:12000,multiplier:2 },
+      { id:2,cost:12000,text:"Golden Batch",desc:"x4 for 8s",duration:8000,multiplier:4 },
+      { id:3,cost:30000,text:"Bake Fever",desc:"x7 for 5s",duration:5000,multiplier:7 },
+      { id:4,cost:65000,text:"Cookie Supernova",desc:"x12 for 3s",duration:3000,multiplier:12 },
+    ];
+    const SKINS = [
+      { id:1,name:"Classic",cost:0,color:"#3d1f0a" },{ id:2,name:"Amber",cost:500,color:"#7b3f18" },{ id:3,name:"Violet",cost:2000,color:"#3f2a64" },{ id:4,name:"Mint",cost:5000,color:"#295a4e" },
+      { id:5,name:"Rose",cost:12000,color:"#5d2c45" },{ id:6,name:"Frost",cost:25000,color:"#425f74" },{ id:7,name:"Solar",cost:60000,color:"#7b5e1d" },{ id:8,name:"Void",cost:150000,color:"#1a1a24" },
+    ];
+    const BAKERY_LEVELS = [
+      { level:1,name:"Novice Bakery",minClicks:0 },{ level:2,name:"Green Bakery",minClicks:500 },{ level:3,name:"Arcane Bakery",minClicks:2000 },{ level:4,name:"Inferno Bakery",minClicks:6000 },{ level:5,name:"Celestial Bakery",minClicks:15000 },
+    ];
+    const ACHIEVEMENTS = [
+      { id:1,title:"First Crumb",desc:"Make 1 click",check:()=>totalClicks>=1 },{ id:2,title:"Dough Fingers",desc:"Make 50 clicks",check:()=>totalClicks>=50 },
+      { id:3,title:"Master Hand",desc:"Make 500 clicks",check:()=>totalClicks>=500 },{ id:4,title:"Obsessed",desc:"Make 5000 clicks",check:()=>totalClicks>=5000 },
+      { id:5,title:"First Thousand",desc:"Hold 1,000 cookies",check:()=>clicks>=1000 },{ id:6,title:"Bakery Tycoon",desc:"Hold 100,000 cookies",check:()=>clicks>=100000 },
+      { id:7,title:"Shopper",desc:"Buy 5 upgrades",check:()=>purchasedUpgradeIds.length+purchasedAutoUpgradeIds.length>=5 },{ id:8,title:"Bulk Order",desc:"Buy 15 upgrades",check:()=>purchasedUpgradeIds.length+purchasedAutoUpgradeIds.length>=15 },
+      { id:9,title:"Automation",desc:"Buy 3 autoclickers",check:()=>purchasedAutoUpgradeIds.length>=3 },{ id:10,title:"Rising",desc:"Reach level 5",check:()=>bakeryLevel>=5 },
+      { id:11,title:"Veteran",desc:"Perform first prestige",check:()=>prestigeCount>=1 },{ id:12,title:"Bakery Legend",desc:"Perform 3 prestiges",check:()=>prestigeCount>=3 },
+    ];
+
+    const $ = id => document.getElementById(id);
+    const D = {
+      headerClicks: $("header-clicks"), headerPower: $("header-power"), headerAuto: $("header-auto"),
+      autoClicks: $("auto-clicks"), prestigeBonus: $("prestige-bonus-text"), level: $("bakery-level-display"), bakeryName: $("bakery-name-display"),
+      cookie: $("cookie"), cookieWrap: $("cookie-wrap"), skins: $("skins-grid"), skinsBadge: $("skins-badge"), achGrid: $("achievements-grid"), achBadge: $("achievements-badge"),
+      abilities: $("abilities-container"), upgrades: $("upgrades-container"), auto: $("auto-container"), log: $("Improvements"),
+      toast: $("achievement-toast"), toastName: $("toast-name"), toastDesc: $("toast-desc"),
+      prestigeBtn: $("prestige-btn"), overlay: $("prestige-overlay"), currentPrestige: $("current-prestige-bonus"), newPrestige: $("new-prestige-bonus"),
+      cancelPrestige: $("prestige-cancel"), confirmPrestige: $("prestige-confirm"), tabUnderline: $("tab-underline")
+    };
+
+    const displayed = { clicks:0, power:1, auto:0, bonus:0 };
+    const formatNum = n => n>=1e12?(n/1e12).toFixed(2)+"T":n>=1e9?(n/1e9).toFixed(2)+"B":n>=1e6?(n/1e6).toFixed(2)+"M":n>=1e3?(n/1e3).toFixed(2)+"K":Math.floor(n).toString();
+    const getEffectiveClickPower = () => Math.max(1, Math.floor(clickPower * abilityMultiplier * levelMultiplier * prestigeMultiplier));
+    const calcPrestigeMultiplier = c => Number((1 + c*0.25).toFixed(2));
+    const getPrestigeGain = () => Math.floor(totalClicks / 5000);
+
+    function updateBakeryLevel() {
+      for (let i = BAKERY_LEVELS.length-1; i >=0; i--) if (totalClicks >= BAKERY_LEVELS[i].minClicks) { bakeryLevel = BAKERY_LEVELS[i].level; break; }
+      levelMultiplier = Number((1 + (bakeryLevel-1)*0.08).toFixed(2));
+      const lvl = BAKERY_LEVELS.find(l=>l.level===bakeryLevel);
+      D.bakeryName.innerHTML = `${lvl.name} · Level <span id="bakery-level-display">${bakeryLevel}</span>`;
+    }
+
+    function setCookieSkin() {
+      const skin = SKINS.find(s=>s.id===activeSkinId) || SKINS[0];
+      D.cookie.querySelector('circle').setAttribute('fill', skin.id===1 ? 'url(#cookieGrad)' : skin.color);
+    }
+
+    function spawnClickFx(e, amount) {
+      const rect = D.cookieWrap.getBoundingClientRect();
+      const x = (e?.clientX || rect.left + rect.width/2) - rect.left;
+      const y = (e?.clientY || rect.top + rect.height/2) - rect.top;
+
+      const ripple = document.createElement('div');
+      ripple.className = 'ripple'; ripple.style.left = `${x}px`; ripple.style.top = `${y}px`;
+      D.cookieWrap.appendChild(ripple); setTimeout(()=>ripple.remove(),520);
+
+      const f = document.createElement('div');
+      f.className = 'float-num'; f.textContent = `+${formatNum(amount)}`; f.style.left=`${x}px`; f.style.top=`${y}px`;
+      D.cookieWrap.appendChild(f); setTimeout(()=>f.remove(),740);
+
+      const count = 8 + Math.floor(Math.random()*5);
+      for (let i=0;i<count;i++) {
+        const p = document.createElement('div'); p.className='particle'; p.textContent='✦';
+        p.style.left=`${x}px`; p.style.top=`${y}px`; p.style.setProperty('--tx', `${(Math.random()*120)-60}px`); p.style.setProperty('--ty', `${-20-(Math.random()*90)}px`);
+        D.cookieWrap.appendChild(p); setTimeout(()=>p.remove(),620);
+      }
+    }
+
+    function showToast(ach) {
+      D.toastName.textContent = ach.title; D.toastDesc.textContent = ach.desc;
+      D.toast.classList.remove('hide'); D.toast.classList.add('show');
+      setTimeout(()=>{ D.toast.classList.remove('show'); D.toast.classList.add('hide'); }, 3500);
+    }
+
+    function checkAchievements() {
+      ACHIEVEMENTS.forEach(a=>{
+        if (!unlockedAchievementIds.includes(a.id) && a.check()) {
+          unlockedAchievementIds.push(a.id); achievementTimes[a.id] = new Date().toISOString();
+          showToast(a); renderAchievements(); saveGame();
+        }
+      });
+    }
+
+    function renderSkins() {
+      D.skins.innerHTML='';
+      SKINS.forEach(s=>{
+        const owned = purchasedSkinIds.includes(s.id), active = s.id===activeSkinId;
+        const btn = document.createElement('button'); btn.className = `skin-dot ${active?'active':''}`;
+        btn.title = owned ? s.name : `${s.name} · ${formatNum(s.cost)}`;
+        btn.innerHTML = `<span style="display:block;width:16px;height:16px;border-radius:50%;background:${s.color}"></span>`;
+        btn.disabled = !owned && clicks < s.cost;
+        btn.onclick = () => {
+          if (!owned) { if (clicks < s.cost) return; clicks -= s.cost; purchasedSkinIds.push(s.id); }
+          activeSkinId = s.id; setCookieSkin(); renderSkins(); saveGame();
+        };
+        D.skins.appendChild(btn);
+      });
+      D.skinsBadge.textContent = `${purchasedSkinIds.length}/${SKINS.length}`;
+    }
+
+    function renderAchievements() {
+      D.achGrid.innerHTML='';
+      ACHIEVEMENTS.forEach(a=>{
+        const unlocked = unlockedAchievementIds.includes(a.id);
+        const d = document.createElement('div'); d.className=`ach-item ${unlocked?'':'locked'}`;
+        d.innerHTML = `<div style="font-family:'DM Mono';font-size:.68rem;color:${unlocked?'var(--gold)':'var(--muted)'}">#${String(a.id).padStart(2,'0')}</div><div>${a.title}</div>${unlocked?`<time>${new Date(achievementTimes[a.id]||Date.now()).toLocaleTimeString()}</time>`:''}`;
+        d.title = a.desc;
+        D.achGrid.appendChild(d);
+      });
+      D.achBadge.textContent = `${unlockedAchievementIds.length}/${ACHIEVEMENTS.length}`;
+    }
+
+    function addLog(text) {
+      const line = document.createElement('div'); line.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
+      line.className = 'entry'; line.style.animationDelay='0ms'; D.log.prepend(line);
+    }
+
+    function iconSvg(key) {
+      return `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="${'#c8a96e'}" stroke-width="1.7"><circle cx="12" cy="12" r="9" opacity=".35"/><path d="M7 12h10M12 7v10"/></svg>`;
+    }
+
+    function createShopItem(item, type) {
+      const el = document.createElement('div'); el.className='shop-item'; el.id = `${type}${item.id}`;
+      const c = purchaseCounts[`${type}${item.id}`] || 0;
+      el.innerHTML = `<div class="icon-box">${iconSvg(item.icon)}${c>0?`<span class="badge">${c}</span>`:''}</div>
+        <div><h4>${item.text}</h4><p>${item.desc}</p><p>Count: ${c}</p></div>
+        <div style="text-align:right"><div style="font-family:'DM Mono';font-size:.72rem;color:var(--gold)">Cost ${formatNum(item.cost)}</div><button class="buy-btn">BUY</button></div>`;
+      const btn = el.querySelector('button');
+      const purchased = type==="upgrade"? purchasedUpgradeIds.includes(item.id):purchasedAutoUpgradeIds.includes(item.id);
+      const affordable = clicks >= item.cost;
+      if (purchased || !affordable) btn.className = `buy-btn ${affordable?'disabled':'disabled'}`; else btn.className='buy-btn afford';
+      btn.disabled = purchased || !affordable;
+      btn.onclick = ()=>{
+        if (clicks < item.cost || purchased) return;
+        clicks -= item.cost;
+        purchaseCounts[`${type}${item.id}`] = (purchaseCounts[`${type}${item.id}`]||0)+1;
+        if (type==='upgrade') { clickPower += item.power; purchasedUpgradeIds.push(item.id); }
+        else { autoClicksPerSecond += item.power; purchasedAutoUpgradeIds.push(item.id); }
+        addLog(`${item.text} purchased`);
+        rerenderShop(); checkAchievements(); saveGame();
+      };
+      return el;
+    }
+
+    function rerenderShop() {
+      D.upgrades.innerHTML=''; D.auto.innerHTML='';
+      upgrades.forEach(u=>D.upgrades.appendChild(createShopItem(u,'upgrade')));
+      autoUpgrades.forEach(a=>D.auto.appendChild(createShopItem(a,'auto')));
+    }
+
+    function renderAbilities() {
+      D.abilities.innerHTML='';
+      abilities.forEach(ab=>{
+        const btn = document.createElement('button'); btn.className='ability-btn'; btn.id=`ability${ab.id}`;
+        btn.innerHTML = `<span>${ab.text}<br><small>${ab.desc} · ${formatNum(ab.cost)}</small></span><svg class="cooldown-svg" viewBox="0 0 36 36"><circle cx="18" cy="18" r="14" stroke="rgba(255,255,255,.15)" stroke-width="4" fill="none"/><circle class="cool" cx="18" cy="18" r="14" stroke="var(--gold)" stroke-width="4" fill="none" stroke-dasharray="88" stroke-dashoffset="0" transform="rotate(-90 18 18)"/></svg>`;
+        btn.disabled = clicks < ab.cost || abilityActive;
+        btn.onclick = ()=>{
+          if (clicks < ab.cost || abilityActive) return;
+          clicks -= ab.cost; abilityActive = true; abilityMultiplier = ab.multiplier;
+          let start = performance.now();
+          const circle = btn.querySelector('.cool');
+          (function tick(now){
+            const p = Math.min(1,(now-start)/ab.duration);
+            circle.style.strokeDashoffset = String(88*p);
+            if (p<1) requestAnimationFrame(tick);
+          })(start);
+          setTimeout(()=>{ abilityActive=false; abilityMultiplier=1; renderAbilities(); saveGame(); }, ab.duration);
+          renderAbilities(); saveGame();
+        };
+        D.abilities.appendChild(btn);
+      });
+    }
+
+    function doClick(e) {
+      const power = getEffectiveClickPower();
+      clicks += power; totalClicks += 1;
+      D.cookie.classList.add('clicked'); setTimeout(()=>D.cookie.classList.remove('clicked'),80);
+      spawnClickFx(e,power); updateBakeryLevel(); checkAchievements(); saveGame();
+    }
+
+    function updateDisplayFrame() {
+      const effAuto = Math.max(0, Math.floor(autoClicksPerSecond * levelMultiplier * prestigeMultiplier));
+      displayed.clicks += (clicks - displayed.clicks) * 0.12;
+      displayed.power += (getEffectiveClickPower() - displayed.power) * 0.12;
+      displayed.auto += (effAuto - displayed.auto) * 0.12;
+      displayed.bonus += (((prestigeMultiplier-1)*100) - displayed.bonus) * 0.12;
+      D.headerClicks.textContent = formatNum(displayed.clicks);
+      D.headerPower.textContent = formatNum(displayed.power);
+      D.headerAuto.textContent = formatNum(displayed.auto);
+      D.autoClicks.textContent = formatNum(displayed.auto);
+      D.prestigeBonus.textContent = `+${Math.max(0,displayed.bonus).toFixed(0)}%`;
+      D.prestigeBtn.disabled = getPrestigeGain() <= 0;
+      renderSkins(); rerenderShop(); renderAbilities();
+      requestAnimationFrame(updateDisplayFrame);
+    }
+
+    function openPrestigeModal() {
+      const gain = getPrestigeGain();
+      D.currentPrestige.textContent = `x${calcPrestigeMultiplier(prestigeCount).toFixed(2)}`;
+      D.newPrestige.textContent = `x${calcPrestigeMultiplier(prestigeCount+gain).toFixed(2)}`;
+      D.overlay.classList.add('open');
+    }
+
+    function doPrestige() {
+      const gain = getPrestigeGain(); if (gain <= 0) return D.overlay.classList.remove('open');
+      prestigeCount += gain; prestigeMultiplier = calcPrestigeMultiplier(prestigeCount);
+      clicks=0; clickPower=1; totalClicks=0; autoClicksPerSecond=0; purchasedUpgradeIds=[]; purchasedAutoUpgradeIds=[];
+      Object.keys(purchaseCounts).forEach(k=>delete purchaseCounts[k]); D.log.innerHTML=''; bakeryLevel=1; levelMultiplier=1;
+      updateBakeryLevel(); rerenderShop(); renderAbilities(); checkAchievements(); saveGame(); D.overlay.classList.remove('open');
+    }
+
+    function saveGame() {
+      localStorage.setItem('cookieClickerSave', JSON.stringify({ clicks, clickPower, totalClicks, autoClicksPerSecond, purchasedUpgradeIds, purchasedAutoUpgradeIds, prestigeCount, prestigeMultiplier, purchasedSkinIds, activeSkinId, unlockedAchievementIds, achievementTimes, log:D.log.innerHTML, purchaseCounts }));
+    }
+
+    function loadGame() {
+      const raw = localStorage.getItem('cookieClickerSave');
+      if (!raw) return;
+      try {
+        const s = JSON.parse(raw);
+        clicks = s.clicks || 0; clickPower = s.clickPower || 1; totalClicks = s.totalClicks || 0; autoClicksPerSecond = s.autoClicksPerSecond || 0;
+        purchasedUpgradeIds = Array.isArray(s.purchasedUpgradeIds)?s.purchasedUpgradeIds:[];
+        purchasedAutoUpgradeIds = Array.isArray(s.purchasedAutoUpgradeIds)?s.purchasedAutoUpgradeIds:[];
+        prestigeCount = s.prestigeCount || 0; prestigeMultiplier = s.prestigeMultiplier || 1;
+        purchasedSkinIds = Array.isArray(s.purchasedSkinIds)&&s.purchasedSkinIds.length?s.purchasedSkinIds:[1]; activeSkinId = s.activeSkinId || 1;
+        unlockedAchievementIds = Array.isArray(s.unlockedAchievementIds)?s.unlockedAchievementIds:[]; achievementTimes = s.achievementTimes || {};
+        D.log.innerHTML = s.log || '';
+        if (s.purchaseCounts && typeof s.purchaseCounts === 'object') Object.assign(purchaseCounts, s.purchaseCounts);
+      } catch { localStorage.removeItem('cookieClickerSave'); }
+    }
+
+    document.querySelectorAll('.sec-header').forEach(h=>h.onclick=()=>h.parentElement.classList.toggle('collapsed'));
+    document.querySelectorAll('.tab').forEach((t,idx)=>t.onclick=()=>{
+      document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active');
+      D.tabUnderline.style.left = idx===0?'0':'50%';
+      D.upgrades.style.display = idx===0?'flex':'none'; D.auto.style.display = idx===1?'flex':'none';
+    });
+    D.cookie.addEventListener('click', doClick);
+    D.prestigeBtn.onclick = openPrestigeModal;
+    D.cancelPrestige.onclick = ()=>D.overlay.classList.remove('open');
+    D.confirmPrestige.onclick = doPrestige;
+    D.overlay.onclick = e => { if (e.target===D.overlay) D.overlay.classList.remove('open'); };
+
+    loadGame(); updateBakeryLevel(); setCookieSkin(); renderSkins(); renderAchievements(); rerenderShop(); renderAbilities();
+    setInterval(()=>{ const autoVal = Math.max(0, Math.floor(autoClicksPerSecond * levelMultiplier * prestigeMultiplier)); if (autoVal>0) { clicks += autoVal; totalClicks += autoVal; updateBakeryLevel(); checkAchievements(); saveGame(); } },1000);
+    requestAnimationFrame(updateDisplayFrame);
+  </script>
 </body>
 </html>
